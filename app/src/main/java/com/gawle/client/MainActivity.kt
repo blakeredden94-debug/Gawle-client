@@ -12,13 +12,19 @@ import android.widget.*
 class MainActivity : Activity() {
 
     private val green = Color.rgb(0, 255, 120)
-    private val dark = Color.rgb(10, 12, 11)
-    private val panel = Color.rgb(25, 30, 27)
-
+    private val dark = Color.rgb(9, 14, 19)
+    private val panel = Color.rgb(22, 31, 39)
+    private val white = Color.WHITE
     private lateinit var content: LinearLayout
+
+    private fun dp(value: Int): Int =
+        (value * resources.displayMetrics.density).toInt()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        window.statusBarColor = dark
+        window.navigationBarColor = dark
 
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -27,15 +33,13 @@ class MainActivity : Activity() {
 
         content = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(22, 30, 22, 20)
+            setPadding(dp(20), dp(24), dp(20), dp(25))
         }
 
         val scroll = ScrollView(this)
         scroll.addView(content)
 
-        root.addView(scroll, LinearLayout.LayoutParams(
-            -1, 0, 1f
-        ))
+        root.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f))
 
         val nav = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
@@ -43,10 +47,10 @@ class MainActivity : Activity() {
             setBackgroundColor(panel)
         }
 
-        listOf("HOME", "FEATURES", "SETTINGS").forEach { tab ->
+        listOf("HOME", "DASHBOARD", "SETTINGS").forEach { tab ->
             val button = Button(this).apply {
                 text = tab
-                textSize = 11f
+                textSize = 10f
                 setTextColor(green)
                 setBackgroundColor(Color.TRANSPARENT)
                 setOnClickListener {
@@ -54,9 +58,7 @@ class MainActivity : Activity() {
                 }
             }
 
-            nav.addView(button, LinearLayout.LayoutParams(
-                0, 65, 1f
-            ))
+            nav.addView(button, LinearLayout.LayoutParams(0, dp(65), 1f))
         }
 
         root.addView(nav)
@@ -70,142 +72,205 @@ class MainActivity : Activity() {
 
         when (page) {
             "HOME" -> homePage()
-            "FEATURES" -> featuresPage()
+            "DASHBOARD" -> dashboardPage()
             "SETTINGS" -> settingsPage()
         }
     }
 
     private fun addText(
-        text: String,
+        value: String,
         size: Float,
-        color: Int
+        color: Int,
+        bold: Boolean = false
     ) {
         val view = TextView(this).apply {
-            this.text = text
+            text = value
             textSize = size
             setTextColor(color)
+            if (bold) typeface = Typeface.DEFAULT_BOLD
         }
+
         content.addView(view)
     }
 
-    private fun addCard(
-        name: String,
-        description: String
+    private fun addGap(height: Int) {
+        content.addView(
+            LinearLayout(this),
+            LinearLayout.LayoutParams(1, dp(height))
+        )
+    }
+
+    private fun addButton(
+        label: String,
+        backgroundColor: Int,
+        textColor: Int,
+        action: () -> Unit
     ) {
+        val button = Button(this).apply {
+            text = label
+            textSize = 15f
+            setTextColor(textColor)
+            typeface = Typeface.DEFAULT_BOLD
+            background = GradientDrawable().apply {
+                setColor(backgroundColor)
+                cornerRadius = dp(14).toFloat()
+            }
+            setOnClickListener { action() }
+        }
+
+        val params = LinearLayout.LayoutParams(-1, dp(60))
+        params.setMargins(0, dp(8), 0, dp(8))
+        content.addView(button, params)
+    }
+
+    private fun addCard(title: String, description: String) {
         val card = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(20, 18, 20, 18)
+            setPadding(dp(18), dp(17), dp(18), dp(17))
             background = GradientDrawable().apply {
                 setColor(panel)
-                cornerRadius = 22f
-                setStroke(2, green)
+                cornerRadius = dp(16).toFloat()
+                setStroke(dp(1), Color.rgb(40, 75, 61))
             }
         }
 
         val heading = TextView(this).apply {
-            text = name
+            text = title
             textSize = 18f
-            setTextColor(Color.WHITE)
+            setTextColor(white)
             typeface = Typeface.DEFAULT_BOLD
         }
 
         val info = TextView(this).apply {
             text = description
             textSize = 13f
-            setTextColor(green)
+            setTextColor(Color.LTGRAY)
         }
 
         card.addView(heading)
         card.addView(info)
 
         val params = LinearLayout.LayoutParams(-1, -2)
-        params.setMargins(0, 12, 0, 5)
+        params.setMargins(0, dp(8), 0, dp(8))
         content.addView(card, params)
     }
 
-    private fun homePage() {
-        addText("GAWLE", 38f, green)
-        addText("CLIENT", 25f, Color.WHITE)
-        addText("MINECRAFT BEDROCK COMPANION", 12f, Color.LTGRAY)
+    private fun launchMinecraft() {
+        val intent = packageManager.getLaunchIntentForPackage(
+            "com.mojang.minecraftpe"
+        )
 
-        addText("\n● CLIENT READY", 15f, green)
-
-        val launch = Button(this).apply {
-            text = "▶  LAUNCH MINECRAFT"
-            textSize = 17f
-            setTextColor(Color.BLACK)
-            setBackgroundColor(green)
-
-            setOnClickListener {
-                val intent = packageManager
-                    .getLaunchIntentForPackage(
-                        "com.mojang.minecraftpe"
-                    )
-
-                if (intent != null) {
-                    startActivity(intent)
-                } else {
-                    Toast.makeText(
-                        this@MainActivity,
-                        "Minecraft not found!",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }
+        if (intent != null) {
+            startActivity(intent)
+        } else {
+            Toast.makeText(
+                this,
+                "Minecraft not found!",
+                Toast.LENGTH_SHORT
+            ).show()
         }
-
-        val params = LinearLayout.LayoutParams(-1, 65)
-        params.setMargins(0, 25, 0, 20)
-        content.addView(launch, params)
-
-        addText("WELCOME TO GAWLE CLIENT", 18f, Color.WHITE)
-        addCard("Your Client", "Your Minecraft companion dashboard.")
-        addCard("Features", "Explore available client features.")
-        addCard("Settings", "Customise your launcher.")
     }
 
-    private fun featuresPage() {
-        addText("FEATURES", 30f, green)
-        addText("GAWLE CLIENT MODULES", 12f, Color.LTGRAY)
+    private fun homePage() {
+        addText("GAWLE", 38f, green, true)
+        addText("CLIENT", 27f, white, true)
+        addText("THE ULTIMATE BEDROCK COMPANION", 11f, Color.LTGRAY)
+
+        addGap(25)
 
         addCard(
-            "Zoom",
-            "In-game zoom support - development planned."
+            "CLIENT STATUS",
+            "● READY TO LAUNCH"
+        )
+
+        addGap(15)
+
+        addButton(
+            "▶  PLAY MINECRAFT",
+            green,
+            Color.BLACK
+        ) {
+            launchMinecraft()
+        }
+
+        addButton(
+            "OPEN CLIENT DASHBOARD",
+            panel,
+            green
+        ) {
+            showPage("DASHBOARD")
+        }
+
+        addGap(20)
+
+        addText("WELCOME BACK", 22f, white, true)
+        addGap(8)
+
+        addText(
+            "Your Minecraft experience starts here.",
+            14f,
+            Color.LTGRAY
+        )
+
+        addGap(12)
+
+        addCard(
+            "YOUR CLIENT",
+            "Explore your GAWLE CLIENT dashboard."
         )
 
         addCard(
-            "Shulker Peek",
-            "Preview support - Bedrock API limitations apply."
+            "CUSTOM FEATURES",
+            "Discover the modules being developed."
+        )
+    }
+
+    private fun dashboardPage() {
+        addText("CLIENT", 16f, Color.LTGRAY, true)
+        addText("DASHBOARD", 32f, green, true)
+
+        addGap(10)
+
+        addCard(
+            "ZOOM",
+            "In-game zoom support. Development planned."
         )
 
         addCard(
-            "Left-Handed Mode",
-            "Left-handed control support - development planned."
+            "SHULKER PEEK",
+            "Shulker contents preview. Add-on integration required."
         )
+
+        addCard(
+            "LEFT-HANDED MODE",
+            "Left-handed controls. Development planned."
+        )
+
+        addCard(
+            "CLIENT INFORMATION",
+            "GAWLE CLIENT Android companion."
+        )
+
+        addGap(15)
+
+        addButton(
+            "▶  LAUNCH MINECRAFT",
+            green,
+            Color.BLACK
+        ) {
+            launchMinecraft()
+        }
     }
 
     private fun settingsPage() {
-        addText("SETTINGS", 30f, green)
+        addText("SETTINGS", 32f, green, true)
         addText("CUSTOMISE YOUR CLIENT", 12f, Color.LTGRAY)
 
-        addCard(
-            "App Version",
-            "GAWLE CLIENT 1.0"
-        )
+        addGap(20)
 
-        addCard(
-            "Game",
-            "Minecraft Bedrock Edition"
-        )
-
-        addCard(
-            "Appearance",
-            "Black and Emerald Green theme"
-        )
-
-        addCard(
-            "About",
-            "GAWLE CLIENT - Android Minecraft companion."
-        )
+        addCard("VERSION", "GAWLE CLIENT 2.0")
+        addCard("GAME", "Minecraft Bedrock Edition")
+        addCard("THEME", "Dark Emerald Gaming Theme")
+        addCard("ABOUT", "Made for Minecraft Bedrock players.")
     }
 }
