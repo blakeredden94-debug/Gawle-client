@@ -2,9 +2,10 @@ package com.gawle.client
 
 import android.app.Activity
 import android.os.Bundle
+import android.content.Intent
+import android.widget.*
 import android.graphics.Color
 import android.view.Gravity
-import android.widget.*
 
 class MainActivity : Activity() {
 
@@ -14,7 +15,7 @@ class MainActivity : Activity() {
         val layout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
-            setPadding(24, 30, 24, 30)
+            setPadding(30, 30, 30, 30)
             setBackgroundColor(Color.rgb(18, 18, 28))
         }
 
@@ -27,29 +28,27 @@ class MainActivity : Activity() {
 
         layout.addView(title)
 
-        val subtitle = TextView(this).apply {
-            text = "Minecraft Bedrock Companion"
-            textSize = 15f
-            setTextColor(Color.LTGRAY)
-            gravity = Gravity.CENTER
-        }
+        val launch = Button(this).apply {
+            text = "LAUNCH MINECRAFT"
+            textSize = 18f
 
-        layout.addView(subtitle)
+            setOnClickListener {
+                val intent = packageManager
+                    .getLaunchIntentForPackage("com.mojang.minecraftpe")
 
-        val features = listOf(
-            "Zoom",
-            "Shulker Peek",
-            "Left-Handed Mode"
-        )
-
-        features.forEach { feature ->
-            val button = Button(this).apply {
-                text = feature
-                textSize = 16f
+                if (intent != null) {
+                    startActivity(intent)
+                } else {
+                    Toast.makeText(
+                        this@MainActivity,
+                        "Minecraft could not be found!",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
             }
-
-            layout.addView(button)
         }
+
+        layout.addView(launch)
 
         setContentView(layout)
     }
