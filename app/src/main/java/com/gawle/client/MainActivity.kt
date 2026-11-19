@@ -207,9 +207,29 @@ class MainActivity : Activity() {
         }
     }
 
-    private fun homePage() {
-        addText("GAWLE", 40f, green, true)
-        addText("CLIENT 3.0", 25f, Color.WHITE, true)
+   private fun homePage() {
+
+    val logo = ImageView(this).apply {
+        val imageId = resources.getIdentifier(
+            "gawle_log",
+            "drawable",
+            packageName
+        )
+
+        if (imageId != 0) {
+            setImageResource(imageId)
+        }
+
+        scaleType = ImageView.ScaleType.FIT_CENTER
+    }
+
+    content.addView(
+        logo,
+        LinearLayout.LayoutParams(-1, 200)
+    )
+
+    addText("GAWLE", 40f, green, true)
+    addText("CLIENT 3.0", 25f, Color.WHITE, true)
 
         addText(
             "MINECRAFT BEDROCK COMPANION",
